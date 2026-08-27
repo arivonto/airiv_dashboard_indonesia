@@ -1,0 +1,880 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="airiv_dashboard_indonesia.ExecutiveDashboard">
+        <div class="o_airiv_dashboard container-fluid bg-light p-4 position-relative">
+            
+            <!-- Real-time Incoming Order Alert Banner -->
+            <t t-if="state.recentSaleAlert">
+                <div class="alert alert-success border-0 shadow-lg d-flex justify-content-between align-items-center mb-4 p-3 rounded-3 text-white" 
+                     style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded-circle bg-white text-success d-flex align-items-center justify-content-center" style="width: 44px; height: 44px; font-size: 1.3rem;">
+                            <i class="fa fa-bell"/>
+                        </div>
+                        <div>
+                            <div class="fw-bold fs-6">
+                                <t t-esc="state.recentSaleAlert.count"/> New Confirmed Sales Order(s) Received!
+                            </div>
+                            <div class="small opacity-90">
+                                Realized settlement updated to <strong><t t-esc="state.recentSaleAlert.total_revenue"/></strong> &#8226; Received at <t t-esc="state.recentSaleAlert.time"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <button class="btn btn-sm btn-light text-success fw-bold px-3 py-1" t-on-click="dismissSaleAlert">
+                            Acknowledge
+                        </button>
+                    </div>
+                </div>
+            </t>
+
+            <!-- Header Banner with Live Filter, Auto-Refresh, Audio Toggle & Export Controls -->
+            <div class="row mb-4">
+                <div class="col-12 d-flex flex-column flex-xl-row justify-content-between align-items-xl-center gap-3 bg-white p-4 rounded shadow-sm border-start border-primary border-4">
+                    <div>
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <h2 class="h3 font-weight-bold text-dark mb-0">
+                                <i class="fa fa-tachometer text-primary me-1"/> AIRIV Command Center
+                            </h2>
+                            <span class="badge bg-primary px-3 py-1"><t t-esc="state.metrics.company_name"/></span>
+                            <t t-if="state.autoRefreshInterval &gt; 0">
+                                <span class="badge bg-success bg-opacity-10 text-success border border-success px-2 py-1 small">
+                                    <i class="fa fa-circle text-success me-1 animate-pulse"/> Auto-Sync (<t t-esc="state.autoRefreshInterval"/>s)
+                                </span>
+                            </t>
+                            <t t-if="hasStockAlerts">
+                                <span class="badge bg-danger bg-opacity-10 text-danger border border-danger px-2 py-1 small fw-bold">
+                                    <i class="fa fa-exclamation-triangle text-danger me-1"/> <t t-esc="stockAlertCount"/> Stock Alert(s)
+                                </span>
+                            </t>
+                        </div>
+                        <p class="text-muted mb-0 small">
+                            Timeframe: <strong class="text-primary"><t t-esc="state.metrics.filter_label"/></strong> &#8226; 
+                            Last Telemetry: <strong class="text-dark"><t t-esc="state.lastUpdated"/></strong> &#8226; Asia/Jakarta (WIB)
+                        </p>
+                    </div>
+
+                    <!-- Action Toolbar -->
+                    <div class="d-flex flex-wrap align-items-center gap-2">
+                        <button type="button" 
+                                class="btn btn-sm rounded shadow-sm d-flex align-items-center gap-1 px-3 py-2" 
+                                t-att-class="state.soundEnabled ? 'btn-success fw-bold text-white' : 'btn-light border text-muted'" 
+                                t-on-click="toggleSound">
+                            <i class="fa" t-att-class="state.soundEnabled ? 'fa-volume-up' : 'fa-volume-off'"/>
+                            <span class="d-none d-sm-inline"><t t-esc="state.soundEnabled ? 'Chime ON' : 'Muted'"/></span>
+                        </button>
+
+                        <!-- Date Filter Group -->
+                        <div class="btn-group bg-light p-1 rounded border shadow-sm" role="group">
+                            <button type="button" 
+                                    class="btn btn-sm rounded" 
+                                    t-att-class="state.currentFilter === 'today' ? 'btn-primary fw-bold shadow-sm' : 'btn-light text-muted'" 
+                                    t-on-click="() => this.setDateFilter('today')">
+                                Today
+                            </button>
+                            <button type="button" 
+                                    class="btn btn-sm rounded" 
+                                    t-att-class="state.currentFilter === '7d' ? 'btn-primary fw-bold shadow-sm' : 'btn-light text-muted'" 
+                                    t-on-click="() => this.setDateFilter('7d')">
+                                7D
+                            </button>
+                            <button type="button" 
+                                    class="btn btn-sm rounded" 
+                                    t-att-class="state.currentFilter === '30d' ? 'btn-primary fw-bold shadow-sm' : 'btn-light text-muted'" 
+                                    t-on-click="() => this.setDateFilter('30d')">
+                                30D
+                            </button>
+                            <button type="button" 
+                                    class="btn btn-sm rounded" 
+                                    t-att-class="state.currentFilter === 'ytd' ? 'btn-primary fw-bold shadow-sm' : 'btn-light text-muted'" 
+                                    t-on-click="() => this.setDateFilter('ytd')">
+                                YTD
+                            </button>
+                            <button type="button" 
+                                    class="btn btn-sm rounded" 
+                                    t-att-class="state.currentFilter === 'all' ? 'btn-primary fw-bold shadow-sm' : 'btn-light text-muted'" 
+                                    t-on-click="() => this.setDateFilter('all')">
+                                All
+                            </button>
+                        </div>
+
+                        <!-- Auto-Refresh Group -->
+                        <div class="btn-group bg-light p-1 rounded border shadow-sm" role="group">
+                            <span class="d-none d-md-flex align-items-center px-2 small text-muted fw-semibold">
+                                <i class="fa fa-refresh me-1" t-att-class="state.autoRefreshInterval &gt; 0 ? 'fa-spin text-success' : ''"/> Auto:
+                            </span>
+                            <button type="button" 
+                                    class="btn btn-sm rounded" 
+                                    t-att-class="state.autoRefreshInterval === 0 ? 'btn-secondary text-white fw-bold shadow-sm' : 'btn-light text-muted'" 
+                                    t-on-click="() => this.setAutoRefresh(0)">
+                                Off
+                            </button>
+                            <button type="button" 
+                                    class="btn btn-sm rounded" 
+                                    t-att-class="state.autoRefreshInterval === 30 ? 'btn-success text-white fw-bold shadow-sm' : 'btn-light text-muted'" 
+                                    t-on-click="() => this.setAutoRefresh(30)">
+                                30s
+                            </button>
+                            <button type="button" 
+                                    class="btn btn-sm rounded" 
+                                    t-att-class="state.autoRefreshInterval === 60 ? 'btn-success text-white fw-bold shadow-sm' : 'btn-light text-muted'" 
+                                    t-on-click="() => this.setAutoRefresh(60)">
+                                60s
+                            </button>
+                        </div>
+
+                        <!-- Export Actions -->
+                        <div class="btn-group bg-light p-1 rounded border shadow-sm" role="group">
+                            <button class="btn btn-sm btn-light text-success fw-semibold d-flex align-items-center gap-1" 
+                                    t-on-click="exportExcel" title="Export Excel (.xlsx)">
+                                <i class="fa fa-file-excel-o"/>
+                                <span>Excel</span>
+                            </button>
+                            <button class="btn btn-sm btn-light text-danger fw-semibold d-flex align-items-center gap-1" 
+                                    t-on-click="exportPdf" title="Print / Export PDF">
+                                <i class="fa fa-file-pdf-o"/>
+                                <span>PDF</span>
+                            </button>
+                        </div>
+
+                        <!-- Manual Refresh -->
+                        <button class="btn btn-outline-primary btn-sm d-flex align-items-center gap-1 px-3 py-2" 
+                                t-on-click="_onRefresh" 
+                                t-att-disabled="state.isLoading">
+                            <i class="fa fa-refresh" t-att-class="state.isLoading ? 'fa-spin' : ''"/>
+                            <span class="d-none d-sm-inline">Refresh</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Level Vitals (6-Column Grid) -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-4 col-xl-2">
+                    <div class="card bg-white border-0 shadow-sm p-3 h-100">
+                        <div class="text-muted small fw-bold text-uppercase">Settled Sales</div>
+                        <div class="h5 text-success fw-bold mt-1"><t t-esc="state.metrics.total_revenue_formatted"/></div>
+                        <div class="small text-muted"><t t-esc="state.metrics.confirmed_sales_count"/> Orders</div>
+                    </div>
+                </div>
+                <div class="col-md-4 col-xl-2">
+                    <div class="card bg-white border-0 shadow-sm p-3 h-100">
+                        <div class="text-muted small fw-bold text-uppercase">Payment Gateway</div>
+                        <div class="h5 text-info fw-bold mt-1"><t t-esc="state.metrics.tri_gateway.total_settled_formatted"/></div>
+                        <div class="small text-muted"><t t-esc="state.metrics.tri_gateway.tx_count"/> Settled Tx</div>
+                    </div>
+                </div>
+                <div class="col-md-4 col-xl-2">
+                    <div class="card bg-white border-0 shadow-sm p-3 h-100">
+                        <div class="text-muted small fw-bold text-uppercase">Piutang Usaha (AR)</div>
+                        <div class="h5 text-warning fw-bold mt-1"><t t-esc="state.metrics.ar_aging.total_ar_formatted"/></div>
+                        <div class="small text-muted"><t t-esc="state.metrics.ar_aging.open_invoice_count"/> Open Invoices</div>
+                    </div>
+                </div>
+                <div class="col-md-4 col-xl-2">
+                    <div class="card bg-white border-0 shadow-sm p-3 h-100">
+                        <div class="text-muted small fw-bold text-uppercase">Hutang Usaha (AP)</div>
+                        <div class="h5 text-danger fw-bold mt-1"><t t-esc="state.metrics.treasury.total_ap_formatted"/></div>
+                        <div class="small text-muted"><t t-esc="state.metrics.treasury.open_bills_count"/> Vendor Bills</div>
+                    </div>
+                </div>
+                <div class="col-md-4 col-xl-2">
+                    <div class="card bg-white border-0 shadow-sm p-3 h-100">
+                        <div class="text-muted small fw-bold text-uppercase">Net Working Capital</div>
+                        <div class="h5 fw-bold mt-1" t-att-class="state.metrics.treasury.net_working_capital_positive ? 'text-success' : 'text-danger'">
+                            <t t-esc="state.metrics.treasury.net_working_capital_formatted"/>
+                        </div>
+                        <div class="small text-muted">AR minus AP Position</div>
+                    </div>
+                </div>
+                <div class="col-md-4 col-xl-2">
+                    <div class="card bg-white border-0 shadow-sm p-3 h-100 position-relative overflow-hidden"
+                         t-att-class="hasStockAlerts ? 'border-start border-danger border-4' : ''">
+                        <div class="text-muted small fw-bold text-uppercase">Stock Health</div>
+                        <div class="h5 mt-1 fw-bold" t-att-class="hasStockAlerts ? 'text-danger' : 'text-success'">
+                            <t t-if="hasStockAlerts"><t t-esc="stockAlertCount"/> Reorders</t>
+                            <t t-else="">Optimal</t>
+                        </div>
+                        <div class="small text-muted">Safety Stock Status</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TREASURY CASH FLOW RUNWAY & IMPORT PIB DUTY RADAR -->
+            <div class="row g-4 mb-4">
+                <!-- Treasury & Supplier AP Maturity Radar -->
+                <div class="col-lg-6">
+                    <div class="card border-0 shadow-sm h-100 bg-white">
+                        <div class="card-header bg-white border-0 pt-4 px-4 d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="fw-bold text-dark mb-0">
+                                    <i class="fa fa-money text-danger me-2"/> Treasury &amp; Hutang Usaha (AP) Radar
+                                </h5>
+                                <div class="small text-muted">Vendor Obligations &amp; Liquidity Runway</div>
+                            </div>
+                            <button class="btn btn-sm btn-outline-danger" t-on-click="openVendorBills">
+                                <i class="fa fa-file-text me-1"/> Open Vendor Bills
+                            </button>
+                        </div>
+                        <div class="card-body px-4 pb-4">
+                            <!-- AP Aging Breakdown -->
+                            <div class="mb-3 p-3 bg-light rounded border">
+                                <div class="d-flex justify-content-between align-items-center small fw-semibold mb-2">
+                                    <span class="text-success">Current (&lt;30d): <t t-esc="state.metrics.treasury.bucket_current_formatted"/></span>
+                                    <span class="text-warning">30-60d: <t t-esc="state.metrics.treasury.bucket_30_60_formatted"/></span>
+                                    <span class="text-danger">&gt;60d: <t t-esc="state.metrics.treasury.bucket_60_plus_formatted"/></span>
+                                </div>
+                                <div class="progress" style="height: 10px;">
+                                    <div class="progress-bar bg-success" role="progressbar" t-attf-style="width: #{state.metrics.treasury.bucket_current_pct}%"/>
+                                    <div class="progress-bar bg-warning" role="progressbar" t-attf-style="width: #{state.metrics.treasury.bucket_30_60_pct}%"/>
+                                    <div class="progress-bar bg-danger" role="progressbar" t-attf-style="width: #{state.metrics.treasury.bucket_60_plus_pct}%"/>
+                                </div>
+                            </div>
+
+                            <!-- Top Upcoming Vendor Maturities -->
+                            <h6 class="fw-bold text-dark small text-uppercase mb-2">Top Upcoming Vendor Maturities (Transfer Bank)</h6>
+                            <t t-if="state.metrics.treasury.top_vendors.length &gt; 0">
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle mb-0 small">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th class="border-0">Vendor / Supplier</th>
+                                                <th class="border-0 text-center">Bills</th>
+                                                <th class="border-0">Due Date</th>
+                                                <th class="border-0 text-end">Amount Due</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <t t-foreach="state.metrics.treasury.top_vendors" t-as="vendor" t-key="vendor.id">
+                                                <tr role="button" t-on-click="() => this.openPartnerForm(vendor.id)">
+                                                    <td class="fw-semibold text-dark text-truncate" style="max-width: 150px;">
+                                                        <t t-esc="vendor.name"/>
+                                                    </td>
+                                                    <td class="text-center"><span class="badge bg-light text-dark border"><t t-esc="vendor.bill_count"/></span></td>
+                                                    <td class="text-muted"><t t-esc="vendor.next_due"/></td>
+                                                    <td class="text-end fw-bold text-danger"><t t-esc="vendor.total_due_formatted"/></td>
+                                                </tr>
+                                            </t>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </t>
+                            <t t-else="">
+                                <div class="text-center py-4 text-muted">
+                                    <i class="fa fa-check-circle-o fa-2x mb-2 text-success"/>
+                                    <p class="mb-0 small">Zero outstanding vendor obligations. Cash runway optimal!</p>
+                                </div>
+                            </t>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Import Landed Cost & Bea Cukai Duty Calculator (PIB) -->
+                <div class="col-lg-6">
+                    <div class="card border-0 shadow-sm h-100 bg-white">
+                        <div class="card-header bg-white border-0 pt-4 px-4 d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="fw-bold text-dark mb-0">
+                                    <i class="fa fa-ship text-info me-2"/> Import Landed Cost &amp; Bea Cukai PIB Radar
+                                </h5>
+                                <div class="small text-muted">Overseas FOB to Landed IDR Telemetry (JISDOR Spot)</div>
+                            </div>
+                            <button class="btn btn-sm btn-outline-info" t-on-click="openPurchaseOrders">
+                                <i class="fa fa-shopping-cart me-1"/> Import POs
+                            </button>
+                        </div>
+                        <div class="card-body px-4 pb-4">
+                            <div class="row g-3 mb-3">
+                                <div class="col-6">
+                                    <div class="p-3 bg-light rounded border">
+                                        <div class="text-muted small text-uppercase fw-bold">Overseas Valuation (FOB USD)</div>
+                                        <div class="h5 fw-bold text-dark mb-0 mt-1"><t t-esc="state.metrics.import_pib.fob_usd_formatted"/></div>
+                                        <div class="small text-muted"><t t-esc="state.metrics.import_pib.cif_idr_formatted"/> (CIF IDR)</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="p-3 bg-light rounded border">
+                                        <div class="text-muted small text-uppercase fw-bold">Total Landed IDR (Est.)</div>
+                                        <div class="h5 fw-bold text-primary mb-0 mt-1"><t t-esc="state.metrics.import_pib.total_landed_idr_formatted"/></div>
+                                        <div class="small text-success fw-semibold">Multiplier: <t t-esc="state.metrics.import_pib.landed_multiplier"/>x FOB</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Statutory Duty & Import Tax Breakdown -->
+                            <div class="p-3 bg-light rounded border small">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span class="text-muted">Bea Masuk (Statutory 7.5%):</span>
+                                    <strong class="text-dark"><t t-esc="state.metrics.import_pib.bea_masuk_formatted"/></strong>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span class="text-muted">PPN Impor (11% Effective Rate):</span>
+                                    <strong class="text-dark"><t t-esc="state.metrics.import_pib.ppn_impor_formatted"/></strong>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span class="text-muted">PPh Pasal 22 Impor (2.5% API-U):</span>
+                                    <strong class="text-dark"><t t-esc="state.metrics.import_pib.pph_22_impor_formatted"/></strong>
+                                </div>
+                                <hr class="my-1"/>
+                                <div class="d-flex justify-content-between align-items-center fw-bold text-danger">
+                                    <span>Total Bea Cukai &amp; Pajak Impor (PIB):</span>
+                                    <span><t t-esc="state.metrics.import_pib.total_pib_tax_formatted"/></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DOMESTIC COURIER & COD SETTLEMENT RADAR (Biteship / RajaOngkir) -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm bg-white p-4">
+                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge bg-warning text-dark px-2 py-1 fw-bold">LOGISTICS RADAR</span>
+                                <h5 class="fw-bold text-dark mb-0">Domestic Courier Delivery &amp; COD Escrow Settlement</h5>
+                            </div>
+                            <div class="d-flex align-items-center gap-2 mt-2 mt-md-0">
+                                <span class="badge bg-light text-dark border">Active Outbound: <strong><t t-esc="state.metrics.shipping_radar.total_active"/> Packages</strong></span>
+                                <button class="btn btn-sm btn-outline-primary" t-on-click="openShippingHub">
+                                    <i class="fa fa-truck me-1"/> Open Logistics Hub
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Courier Status & COD Summary Grid -->
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-3">
+                                <div class="p-3 bg-light rounded border">
+                                    <div class="text-muted small text-uppercase fw-bold">In Transit (On Courier)</div>
+                                    <div class="h4 fw-bold text-primary mb-0 mt-1"><t t-esc="state.metrics.shipping_radar.in_transit_count"/> Packages</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="p-3 bg-light rounded border">
+                                    <div class="text-muted small text-uppercase fw-bold">Pending Pickup / Manifest</div>
+                                    <div class="h4 fw-bold text-warning mb-0 mt-1"><t t-esc="state.metrics.shipping_radar.pending_pickup_count"/> Packages</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="p-3 bg-light rounded border">
+                                    <div class="text-muted small text-uppercase fw-bold">Delivered (POD)</div>
+                                    <div class="h4 fw-bold text-success mb-0 mt-1"><t t-esc="state.metrics.shipping_radar.delivered_count"/> Orders</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="p-3 bg-light rounded border">
+                                    <div class="text-muted small text-uppercase fw-bold">Disbursed COD to Bank</div>
+                                    <div class="h4 fw-bold text-success mb-0 mt-1"><t t-esc="state.metrics.shipping_radar.cod_disbursed_formatted"/></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Carrier Share Distribution Bar -->
+                        <div class="mb-3 p-3 bg-light rounded border">
+                            <div class="d-flex justify-content-between align-items-center small fw-semibold mb-2">
+                                <span class="text-primary">JNE Express: <t t-esc="state.metrics.shipping_radar.jne_pct"/>%</span>
+                                <span class="text-danger">J&amp;T Express: <t t-esc="state.metrics.shipping_radar.jnt_pct"/>%</span>
+                                <span class="text-warning">SiCepat: <t t-esc="state.metrics.shipping_radar.sicepat_pct"/>%</span>
+                                <span class="text-success">GoSend / Grab: <t t-esc="state.metrics.shipping_radar.instant_pct"/>%</span>
+                            </div>
+                            <div class="progress" style="height: 8px;">
+                                <div class="progress-bar bg-primary" role="progressbar" t-attf-style="width: #{state.metrics.shipping_radar.jne_pct}%"/>
+                                <div class="progress-bar bg-danger" role="progressbar" t-attf-style="width: #{state.metrics.shipping_radar.jnt_pct}%"/>
+                                <div class="progress-bar bg-warning" role="progressbar" t-attf-style="width: #{state.metrics.shipping_radar.sicepat_pct}%"/>
+                                <div class="progress-bar bg-success" role="progressbar" t-attf-style="width: #{state.metrics.shipping_radar.instant_pct}%"/>
+                            </div>
+                        </div>
+
+                        <!-- Live Waybill Tracking Table -->
+                        <t t-if="state.metrics.shipping_radar.recent_shipments.length &gt; 0">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle mb-0 small">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th class="border-0">AWB / No. Resi</th>
+                                            <th class="border-0">Courier Service</th>
+                                            <th class="border-0">Recipient &amp; Destination</th>
+                                            <th class="border-0">Payment Type</th>
+                                            <th class="border-0">COD Escrow Status</th>
+                                            <th class="border-0 text-center">Fulfillment Status</th>
+                                            <th class="border-0 text-end">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-foreach="state.metrics.shipping_radar.recent_shipments" t-as="ship" t-key="ship.id">
+                                            <tr>
+                                                <td><span class="badge bg-light text-dark border font-monospace"><t t-esc="ship.awb"/></span></td>
+                                                <td>
+                                                    <span class="badge" t-att-class="ship.courier === 'JNE' ? 'bg-primary' : (ship.courier === 'JNT' ? 'bg-danger' : (ship.courier === 'SICEPAT' ? 'bg-warning text-dark' : 'bg-success'))">
+                                                        <t t-esc="ship.courier"/>
+                                                    </span>
+                                                    <span class="ms-1 text-muted"><t t-esc="ship.service"/></span>
+                                                </td>
+                                                <td>
+                                                    <strong><t t-esc="ship.recipient"/></strong>
+                                                    <div class="text-muted" style="font-size: 11px;"><t t-esc="ship.city"/></div>
+                                                </td>
+                                                <td>
+                                                    <t t-if="ship.is_cod">
+                                                        <span class="badge bg-danger">COD: <t t-esc="ship.cod_amount_formatted"/></span>
+                                                    </t>
+                                                    <t t-else="">
+                                                        <span class="badge bg-light text-secondary border">Non-COD</span>
+                                                    </t>
+                                                </td>
+                                                <td>
+                                                    <t t-if="ship.is_cod">
+                                                        <span class="badge" t-att-class="ship.cod_status === 'remitted' ? 'bg-success' : 'bg-warning text-dark'">
+                                                            <t t-esc="ship.cod_status === 'remitted' ? 'Disbursed' : 'Held in Escrow'"/>
+                                                        </span>
+                                                    </t>
+                                                    <t t-else="">
+                                                        <span class="text-muted">-</span>
+                                                    </t>
+                                                </td>
+                                                <td class="text-center">
+                                                    <span class="badge" t-att-class="ship.status === 'delivered' ? 'bg-success' : (ship.status === 'in_transit' ? 'bg-info' : 'bg-warning text-dark')">
+                                                        <t t-esc="ship.status_label"/>
+                                                    </span>
+                                                </td>
+                                                <td class="text-end">
+                                                    <button class="btn btn-sm btn-outline-secondary py-0 px-2" 
+                                                            t-on-click="() => this.trackResi(ship.tracking_url)"
+                                                            title="Check Resi Live on Courier Gateway">
+                                                        <i class="fa fa-external-link me-1"/> Cek Resi
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </t>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </t>
+                        <t t-else="">
+                            <div class="text-center py-3 text-muted small">
+                                <i class="fa fa-info-circle me-1"/> No domestic shipments recorded yet. Connect Biteship or RajaOngkir to sync live AWB resi.
+                            </div>
+                        </t>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TRI-GATEWAY PAYMENT RAILS & QRIS LIVE TELEMETRY COCKPIT -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm bg-white p-4">
+                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge bg-primary px-2 py-1 text-white fw-bold">TRI-GATEWAY</span>
+                                <h5 class="fw-bold text-dark mb-0">Live Payment Settlement Rails &amp; QRIS Telemetry</h5>
+                            </div>
+                            <div class="d-flex align-items-center gap-2 mt-2 mt-md-0">
+                                <span class="badge bg-light text-secondary border">MDR Fees: <strong class="text-danger"><t t-esc="state.metrics.tri_gateway.total_fees_formatted"/></strong></span>
+                                <button class="btn btn-sm btn-outline-primary" t-on-click="openGatewayTransactions">
+                                    <i class="fa fa-exchange me-1"/> All Webhook Feeds
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 3 Core Gateway Rail Cards -->
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-4">
+                                <div class="p-3 rounded border bg-light h-100">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="fw-bold text-dark"><i class="fa fa-credit-card text-primary me-1"/> Midtrans (SNAP)</span>
+                                        <span class="badge bg-success bg-opacity-10 text-success border border-success px-2 py-0">Online</span>
+                                    </div>
+                                    <div class="h5 fw-bold text-primary mb-1"><t t-esc="state.metrics.tri_gateway.midtrans_vol_formatted"/></div>
+                                    <div class="small text-muted">Domestic QRIS, GoPay, ShopeePay &amp; Cards</div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="p-3 rounded border bg-light h-100">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="fw-bold text-dark"><i class="fa fa-university text-info me-1"/> Xendit Direct VA</span>
+                                        <span class="badge bg-success bg-opacity-10 text-success border border-success px-2 py-0">Online</span>
+                                    </div>
+                                    <div class="h5 fw-bold text-info mb-1"><t t-esc="state.metrics.tri_gateway.xendit_vol_formatted"/></div>
+                                    <div class="small text-muted">BCA, Mandiri, BRI, BNI Virtual Accounts</div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="p-3 rounded border bg-light h-100">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="fw-bold text-dark"><i class="fa fa-paypal text-primary me-1"/> PayPal REST v2</span>
+                                        <span class="badge bg-success bg-opacity-10 text-success border border-success px-2 py-0">Cross-Border</span>
+                                    </div>
+                                    <div class="h5 fw-bold text-dark mb-1"><t t-esc="state.metrics.tri_gateway.paypal_vol_formatted"/></div>
+                                    <div class="small text-muted">International USD / EUR to IDR Spot Conversion</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bank Indonesia Live Forex Bar -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm bg-white p-4">
+                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge bg-danger px-2 py-1 text-white fw-bold">BI KURS</span>
+                                <h5 class="fw-bold text-dark mb-0">Bank Indonesia Live Exchange Rates &amp; Cross-Border Rails</h5>
+                            </div>
+                            <div class="small text-muted mt-2 mt-md-0">
+                                <i class="fa fa-clock-o me-1"/> Refreshed: <span class="fw-semibold text-dark"><t t-esc="state.metrics.forex.updated_at"/></span> &#8226; <span class="badge bg-light text-primary border"><t t-esc="state.metrics.forex.source"/></span>
+                            </div>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="p-3 rounded border bg-light d-flex justify-content-between align-items-center">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="rounded-circle bg-white border d-flex align-items-center justify-content-center" style="width: 46px; height: 46px; font-size: 1.3rem;">
+                                            <i class="fa fa-dollar text-success"/>
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold text-dark fs-5">USD / IDR</div>
+                                            <div class="small text-muted">US Dollar to Indonesian Rupiah</div>
+                                        </div>
+                                    </div>
+                                    <div class="text-end">
+                                        <div class="h4 text-primary fw-bold mb-0"><t t-esc="state.metrics.forex.usd_mid"/></div>
+                                        <div class="small text-muted">
+                                            B: <span class="text-success fw-semibold"><t t-esc="state.metrics.forex.usd_buy"/></span> &#8226; 
+                                            S: <span class="text-danger fw-semibold"><t t-esc="state.metrics.forex.usd_sell"/></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="p-3 rounded border bg-light d-flex justify-content-between align-items-center">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="rounded-circle bg-white border d-flex align-items-center justify-content-center" style="width: 46px; height: 46px; font-size: 1.3rem;">
+                                            <i class="fa fa-eur text-primary"/>
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold text-dark fs-5">EUR / IDR</div>
+                                            <div class="small text-muted">Euro to Indonesian Rupiah</div>
+                                        </div>
+                                    </div>
+                                    <div class="text-end">
+                                        <div class="h4 text-primary fw-bold mb-0"><t t-esc="state.metrics.forex.eur_mid"/></div>
+                                        <div class="small text-muted">
+                                            B: <span class="text-success fw-semibold"><t t-esc="state.metrics.forex.eur_buy"/></span> &#8226; 
+                                            S: <span class="text-danger fw-semibold"><t t-esc="state.metrics.forex.eur_sell"/></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AR Aging & DJP Coretax Compliance -->
+            <div class="row g-4 mb-4">
+                <!-- Accounts Receivable & WhatsApp Collection Radar -->
+                <div class="col-lg-6">
+                    <div class="card border-0 shadow-sm h-100 bg-white">
+                        <div class="card-header bg-white border-0 pt-4 px-4 d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="fw-bold text-dark mb-0">
+                                    <i class="fa fa-clock-o text-warning me-2"/> Piutang Usaha &amp; Aging Radar
+                                </h5>
+                                <div class="small text-muted">Outstanding Customer Invoice Lifecycle</div>
+                            </div>
+                            <button class="btn btn-sm btn-outline-primary" t-on-click="() => this.openCustomerInvoices('unpaid')">
+                                <i class="fa fa-list me-1"/> View Invoices
+                            </button>
+                        </div>
+                        <div class="card-body px-4 pb-4">
+                            <div class="mb-3 p-3 bg-light rounded border">
+                                <div class="d-flex justify-content-between align-items-center small fw-semibold mb-2">
+                                    <span class="text-success">Current (&lt;30d): <t t-esc="state.metrics.ar_aging.bucket_current_formatted"/></span>
+                                    <span class="text-warning">30-60d: <t t-esc="state.metrics.ar_aging.bucket_30_60_formatted"/></span>
+                                    <span class="text-danger">&gt;60d: <t t-esc="state.metrics.ar_aging.bucket_60_plus_formatted"/></span>
+                                </div>
+                                <div class="progress" style="height: 10px;">
+                                    <div class="progress-bar bg-success" role="progressbar" t-attf-style="width: #{state.metrics.ar_aging.bucket_current_pct}%"/>
+                                    <div class="progress-bar bg-warning" role="progressbar" t-attf-style="width: #{state.metrics.ar_aging.bucket_30_60_pct}%"/>
+                                    <div class="progress-bar bg-danger" role="progressbar" t-attf-style="width: #{state.metrics.ar_aging.bucket_60_plus_pct}%"/>
+                                </div>
+                            </div>
+
+                            <h6 class="fw-bold text-dark small text-uppercase mb-2">Top Overdue Receivables &amp; Follow-up</h6>
+                            <t t-if="state.metrics.ar_aging.top_debtors.length &gt; 0">
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle mb-0 small">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th class="border-0">Customer / Client</th>
+                                                <th class="border-0 text-center">Invoices</th>
+                                                <th class="border-0 text-end">Outstanding</th>
+                                                <th class="border-0 text-end">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <t t-foreach="state.metrics.ar_aging.top_debtors" t-as="debtor" t-key="debtor.id">
+                                                <tr>
+                                                    <td class="fw-semibold text-dark text-truncate" style="max-width: 150px;" role="button" t-on-click="() => this.openPartnerForm(debtor.id)">
+                                                        <t t-esc="debtor.name"/>
+                                                    </td>
+                                                    <td class="text-center"><span class="badge bg-light text-dark border"><t t-esc="debtor.overdue_count"/></span></td>
+                                                    <td class="text-end fw-bold text-danger"><t t-esc="debtor.total_due_formatted"/></td>
+                                                    <td class="text-end">
+                                                        <button class="btn btn-sm btn-success py-0 px-2 fw-semibold" 
+                                                                t-on-click="() => this.sendWhatsAppReminder(debtor)"
+                                                                title="Send WhatsApp Payment Reminder">
+                                                            <i class="fa fa-whatsapp me-1"/> Reminder
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            </t>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </t>
+                            <t t-else="">
+                                <div class="text-center py-4 text-muted">
+                                    <i class="fa fa-check-circle-o fa-2x mb-2 text-success"/>
+                                    <p class="mb-0 small">Zero overdue receivables. All client balances are settled!</p>
+                                </div>
+                            </t>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DJP e-Faktur & Coretax PPN Compliance -->
+                <div class="col-lg-6">
+                    <div class="card border-0 shadow-sm h-100 bg-white">
+                        <div class="card-header bg-white border-0 pt-4 px-4 d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="fw-bold text-dark mb-0">
+                                    <i class="fa fa-file-text-o text-primary me-2"/> DJP e-Faktur &amp; Coretax Compliance
+                                </h5>
+                                <div class="small text-muted">Statutory PPN 12% &#8226; Effective DPP Nilai Lain 11%</div>
+                            </div>
+                            <span class="badge bg-primary px-3 py-1">Coretax Ready</span>
+                        </div>
+                        <div class="card-body px-4 pb-4">
+                            <div class="row g-3 mb-3">
+                                <div class="col-6">
+                                    <div class="p-3 bg-light rounded border">
+                                        <div class="text-muted small text-uppercase fw-bold">Taxable Base (DPP)</div>
+                                        <div class="h5 fw-bold text-dark mb-0 mt-1"><t t-esc="state.metrics.tax_compliance.taxable_base_formatted"/></div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="p-3 bg-light rounded border">
+                                        <div class="text-muted small text-uppercase fw-bold">PPN Output Collected</div>
+                                        <div class="h5 fw-bold text-success mb-0 mt-1"><t t-esc="state.metrics.tax_compliance.total_ppn_formatted"/></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="p-3 bg-light rounded border">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span class="fw-semibold text-dark small">16-Digit NPWP/NIK Validation Health</span>
+                                    <span class="fw-bold text-primary"><t t-esc="state.metrics.tax_compliance.compliance_rate"/>%</span>
+                                </div>
+                                <div class="progress mb-2" style="height: 8px;">
+                                    <div class="progress-bar bg-primary" role="progressbar" t-attf-style="width: #{state.metrics.tax_compliance.compliance_rate}%"/>
+                                </div>
+                                <div class="d-flex justify-content-between small text-muted">
+                                    <span>Audited Invoices: <strong><t t-esc="state.metrics.tax_compliance.total_invoices_audited"/></strong></span>
+                                    <span>Missing NPWP/NIK: <strong class="text-danger"><t t-esc="state.metrics.tax_compliance.missing_npwp_count"/></strong></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Products & Inventory Reorder Section -->
+            <div class="row g-4 mb-4">
+                <div class="col-lg-6">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-header bg-white border-0 pt-4 px-4 d-flex justify-content-between align-items-center">
+                            <h5 class="fw-bold text-dark mb-0">
+                                <i class="fa fa-trophy text-warning me-2"/> Top Products (<t t-esc="state.metrics.filter_label"/>)
+                            </h5>
+                            <span class="badge bg-light text-dark border">By Realized Revenue</span>
+                        </div>
+                        <div class="card-body px-4 pb-4">
+                            <t t-if="state.metrics.top_products.length &gt; 0">
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle mb-0">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th class="border-0">SKU</th>
+                                                <th class="border-0">Product Name</th>
+                                                <th class="border-0 text-center">Sold</th>
+                                                <th class="border-0 text-end">Revenue</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <t t-foreach="state.metrics.top_products" t-as="item" t-key="item.id">
+                                                <tr role="button" t-on-click="() => this.openProductForm(item.id)">
+                                                    <td><span class="badge bg-secondary"><t t-esc="item.code"/></span></td>
+                                                    <td class="fw-semibold text-dark text-truncate" style="max-width: 180px;"><t t-esc="item.name"/></td>
+                                                    <td class="text-center"><span class="badge bg-light text-primary border px-2 py-1"><t t-esc="item.qty"/></span></td>
+                                                    <td class="text-end fw-bold text-success"><t t-esc="item.revenue_formatted"/></td>
+                                                </tr>
+                                            </t>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </t>
+                            <t t-else="">
+                                <div class="text-center py-5 text-muted">
+                                    <i class="fa fa-calendar-times-o fa-3x mb-3 text-secondary"/>
+                                    <p class="mb-0">No confirmed transactions recorded during <strong><t t-esc="state.metrics.filter_label"/></strong>.</p>
+                                </div>
+                            </t>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-header bg-white border-0 pt-4 px-4 d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center gap-2">
+                                <h5 class="fw-bold text-dark mb-0">
+                                    <i class="fa fa-exclamation-triangle text-danger me-1"/> Low Stock &amp; Reorder Alerts
+                                </h5>
+                                <t t-if="hasStockAlerts">
+                                    <span class="badge bg-danger text-white"><t t-esc="stockAlertCount"/> Items</span>
+                                </t>
+                            </div>
+                            <button class="btn btn-sm btn-outline-secondary" t-on-click="openInventoryReplenishment">
+                                <i class="fa fa-cubes me-1"/> Replenishment Rules
+                            </button>
+                        </div>
+                        <div class="card-body px-4 pb-4">
+                            <t t-if="hasStockAlerts">
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle mb-0">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th class="border-0">SKU</th>
+                                                <th class="border-0">Storable Item</th>
+                                                <th class="border-0 text-center">On Hand</th>
+                                                <th class="border-0 text-end">Alert Level</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <t t-foreach="state.metrics.inventory_alerts.items" t-as="stockItem" t-key="stockItem.id">
+                                                <tr role="button" t-on-click="() => this.openProductForm(stockItem.id)">
+                                                    <td><span class="badge bg-light text-dark border"><t t-esc="stockItem.code"/></span></td>
+                                                    <td class="fw-semibold text-dark text-truncate" style="max-width: 170px;">
+                                                        <t t-esc="stockItem.name"/>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <span class="badge fw-bold bg-danger text-white">
+                                                            <t t-esc="stockItem.qty"/> <t t-esc="stockItem.uom"/>
+                                                        </span>
+                                                    </td>
+                                                    <td class="text-end">
+                                                        <span class="badge bg-danger">
+                                                            <t t-esc="stockItem.badge_label"/>
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            </t>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </t>
+                            <t t-else="">
+                                <div class="text-center py-5 text-muted">
+                                    <i class="fa fa-check-circle-o fa-3x mb-3 text-success"/>
+                                    <p class="mb-0 text-dark fw-bold">All Stock Levels Optimal</p>
+                                    <p class="small text-muted mb-0">No storable products have breached safety stock thresholds.</p>
+                                </div>
+                            </t>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Conversion Velocity Section -->
+            <div class="row g-4 mb-4">
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm p-4 bg-white">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="fw-bold text-dark mb-0">
+                                <i class="fa fa-bolt text-primary me-2"/> Operational Pipeline &amp; Conversion Velocity
+                            </h5>
+                            <span class="badge bg-light text-primary border px-3 py-1">Timeframe: <t t-esc="state.metrics.filter_label"/></span>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="p-3 bg-light rounded border h-100">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="text-muted small">Sales Order Conversion</span>
+                                        <span class="fw-bold text-primary"><t t-esc="conversionPercentage"/>%</span>
+                                    </div>
+                                    <div class="progress" style="height: 8px;">
+                                        <div class="progress-bar bg-primary" role="progressbar" 
+                                             t-attf-style="width: #{conversionPercentage}%"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="p-3 bg-light rounded border h-100 d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="text-muted small">Active Pipeline In-Review</div>
+                                        <div class="h5 mb-0 fw-bold text-dark"><t t-esc="state.metrics.total_sales_count - state.metrics.confirmed_sales_count"/> Draft / Sent Orders</div>
+                                    </div>
+                                    <span class="badge bg-warning text-dark px-3 py-2">In Pipeline</span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="p-3 bg-light rounded border h-100 d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="text-muted small">Period Settlement Target</div>
+                                        <div class="h5 mb-0 fw-bold text-success"><t t-esc="state.metrics.total_revenue_formatted"/></div>
+                                    </div>
+                                    <span class="badge bg-success px-3 py-2">Settled IDR</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Modular Plugins Grid -->
+            <div class="row g-4">
+                <div class="col-12">
+                    <h5 class="fw-bold text-dark mb-1">
+                        <i class="fa fa-cubes text-secondary me-2"/> Active Localization &amp; Gateway Modules
+                    </h5>
+                </div>
+                <t t-foreach="state.metrics.plugins" t-as="plugin" t-key="plugin.id">
+                    <div class="col-md-6 col-xl-3">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-header bg-white border-0 pt-3 px-3 d-flex justify-content-between align-items-center">
+                                <span class="fw-bold text-dark text-truncate" style="max-width: 70%;"><t t-esc="plugin.name"/></span>
+                                <span class="badge bg-success">Active</span>
+                            </div>
+                            <div class="card-body px-3 pb-3">
+                                <div class="small text-muted mb-2"><code class="text-secondary"><t t-esc="plugin.code"/></code></div>
+                                <div class="p-2 bg-light rounded border small">
+                                    <div class="text-dark"><strong>Widget:</strong> <t t-esc="plugin.template_name"/></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </div>
+        </div>
+    </t>
+</templates>

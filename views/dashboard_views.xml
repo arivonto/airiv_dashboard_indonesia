@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Client Action for Command Center -->
+    <record id="action_airiv_executive_dashboard" model="ir.actions.client">
+        <field name="name">Command Center</field>
+        <field name="tag">airiv_dashboard_indonesia.ExecutiveDashboard</field>
+        <field name="target">current</field>
+    </record>
+
+    <!-- Action & List View for Gateway Transactions -->
+    <record id="action_airiv_gateway_transactions" model="ir.actions.act_window">
+        <field name="name">Payment Rails Feed</field>
+        <field name="res_model">airiv.gateway.transaction</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="view_airiv_gateway_transaction_tree" model="ir.ui.view">
+        <field name="name">airiv.gateway.transaction.list</field>
+        <field name="model">airiv.gateway.transaction</field>
+        <field name="arch" type="xml">
+            <list string="Live Gateway Transactions" decoration-success="status == 'settlement'" decoration-warning="status == 'pending'" decoration-danger="status in ('expire', 'failed')">
+                <field name="transaction_time" string="WIB Time"/>
+                <field name="name" string="Order Reference"/>
+                <field name="gateway" widget="badge"/>
+                <field name="payment_type" string="Channel"/>
+                <field name="customer_name" string="Payer"/>
+                <field name="amount" sum="Total Gross"/>
+                <field name="fee_amount" sum="Total MDR Fees"/>
+                <field name="net_amount" sum="Total Net Settled"/>
+                <field name="status" widget="badge" decoration-success="status == 'settlement'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Action & List View for Domestic Shipping Radar -->
+    <record id="action_airiv_shipping_tracker" model="ir.actions.act_window">
+        <field name="name">Domestic Courier Hub</field>
+        <field name="res_model">airiv.shipping.tracker</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="view_airiv_shipping_tracker_tree" model="ir.ui.view">
+        <field name="name">airiv.shipping.tracker.list</field>
+        <field name="model">airiv.shipping.tracker</field>
+        <field name="arch" type="xml">
+            <list string="Courier Shipments &amp; COD Escrow" decoration-success="status == 'delivered'" decoration-info="status == 'in_transit'" decoration-warning="status == 'pending_pickup'" decoration-danger="status == 'returned'">
+                <field name="last_update_time" string="Last Updated"/>
+                <field name="name" string="AWB / Resi"/>
+                <field name="order_ref" string="Order DO"/>
+                <field name="courier" widget="badge"/>
+                <field name="service_type" string="Service"/>
+                <field name="recipient_name" string="Recipient"/>
+                <field name="destination_city" string="Destination"/>
+                <field name="is_cod" string="COD"/>
+                <field name="cod_amount" sum="Total COD"/>
+                <field name="cod_status" widget="badge" decoration-warning="cod_status == 'pending_remittance'" decoration-success="cod_status == 'remitted'"/>
+                <field name="status" widget="badge" decoration-success="status == 'delivered'" decoration-info="status == 'in_transit'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Action & List View for Dashboard Plugins -->
+    <record id="action_airiv_dashboard_plugin_tree" model="ir.actions.act_window">
+        <field name="name">Dashboard Plugins</field>
+        <field name="res_model">airiv.dashboard.plugin</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="view_airiv_dashboard_plugin_tree" model="ir.ui.view">
+        <field name="name">airiv.dashboard.plugin.list</field>
+        <field name="model">airiv.dashboard.plugin</field>
+        <field name="arch" type="xml">
+            <list string="AIRIV Plugins" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="code"/>
+                <field name="template_name"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Root Menuitem -->
+    <menuitem id="menu_airiv_root"
+              name="AIRIV.id"
+              web_icon="airiv_dashboard_indonesia,static/description/icon.png"
+              sequence="-100"/>
+
+    <menuitem id="menu_airiv_command_center"
+              name="Command Center"
+              parent="menu_airiv_root"
+              action="action_airiv_executive_dashboard"
+              sequence="10"/>
+
+    <menuitem id="menu_airiv_payment_rails"
+              name="Payment Rails (Midtrans &amp; Xendit)"
+              parent="menu_airiv_root"
+              action="action_airiv_gateway_transactions"
+              sequence="20"/>
+
+    <menuitem id="menu_airiv_logistics_hub"
+              name="Logistics Hub (Biteship &amp; RajaOngkir)"
+              parent="menu_airiv_root"
+              action="action_airiv_shipping_tracker"
+              sequence="30"/>
+
+    <menuitem id="menu_airiv_plugin_manager"
+              name="Plugin Manager"
+              parent="menu_airiv_root"
+              action="action_airiv_dashboard_plugin_tree"
+              sequence="90"/>
+</odoo>

@@ -1,0 +1,30 @@
+/* AIRIV Command Center Viewport & Scrolling Engine */
+.o_action_manager:has(.o_airiv_dashboard) {
+    overflow: hidden !important;
+}
+
+.o_airiv_dashboard {
+    height: 100% !important;
+    max-height: 100% !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 6rem !important;
+
+    /* Modern slim scrollbar */
+    &::-webkit-scrollbar {
+        width: 8px;
+    }
+    &::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 4px;
+    }
+    &::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 4px;
+    }
+    &::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+    }
+}

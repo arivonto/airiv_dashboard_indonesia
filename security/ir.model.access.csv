@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_airiv_dashboard_plugin_user,airiv.dashboard.plugin.user,model_airiv_dashboard_plugin,base.group_user,1,1,1,1
+access_airiv_gateway_transaction_user,airiv.gateway.transaction.user,model_airiv_gateway_transaction,base.group_user,1,1,1,1
+access_airiv_shipping_tracker_user,airiv.shipping.tracker.user,model_airiv_shipping_tracker,base.group_user,1,1,1,1
