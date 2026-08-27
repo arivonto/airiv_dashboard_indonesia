@@ -1,28 +1,24 @@
-# AIRIV Dashboard Indonesia for Odoo 18.0
-
-Comprehensive analytics and regional operational intelligence tailored specifically for Indonesian enterprises (UMKM and SMBs), providing real-time financial tracking, tax compliance oversight, and localized logistics monitoring natively within Odoo Community.
+# AIRIV Dashboard Indonesia
 
 ## Detailed Feature Capabilities
-
-- **Indonesian Regulatory & Financial Alignment**: Complete oversight designed around Indonesian statutory compliance, supporting local tax standards (PPN 11% effective calculations with DPP Nilai Lain, NPWP/NIK validation) and localized multi-gate payment tracking (Midtrans, Xendit, and PayPal).
-- **Logistics Integration Hub**: Unified monitoring for domestic shipping aggregators (Biteship, RajaOngkir, Shipper) covering primary couriers (JNE, J&T, SiCepat, GoSend) directly inside sales and inventory workflows.
-- **WhatsApp Notification Metrics**: Operational dashboards tracking automated customer messaging metrics via WhatsApp Business API (Fonnte/Waha) for delivery updates, OTPs, and invoices.
-- **Executive Analytics & KPI Cards**: Real-time sales velocity, revenue breakdowns in IDR (Rp), and stock turnover metrics built on pure Odoo ORM models without external middleware overhead.
+- **Regulatory Articles**: Statutory PPN 11% effective rate calculations and DPP Nilai Lain compliance.
+- **Technical Scope**: 100% Native Odoo Community Architecture ensuring Zero External Server Overhead.
+- **API Rails**: Native hooks for WhatsApp Business API (Fonnte/Waha) and logistics aggregators (Biteship, RajaOngkir, Shipper).
 
 ## Installation & Odoo Configuration Guide
+1. Clone or extract the `airiv_dashboard_indonesia` directory into your Odoo custom addons path.
+2. Restart your Odoo container to refresh the system (`docker restart odoo_app`).
+3. Activate **Developer Mode**, update the Apps List, and install **AIRIV Dashboard Indonesia**.
+4. Configure default IDR currency and domestic payment rails (Midtrans, Xendit) via standard settings.
 
-1. Clone or copy the airiv_dashboard_indonesia module directory into your Odoo custom addons path.
-2. Restart your Odoo container to refresh module lists:
-   docker restart odoo_app
-3. Navigate to your Odoo instance, activate **Developer Mode**, go to **Apps**, update the app list, and click **Activate** on **AIRIV Dashboard Indonesia**.
+## Validated Commercial Test Use Case
+- **Benchmark Scenario**: Automated ORM integration suite executing inside the active container (`odoo shell`) to verify complete multi-branch revenue aggregation and effective PPN separation.
 
 ## Module Specifications Table
-
 | Specification | Value |
 | :--- | :--- |
-| **Module Name** | airiv_dashboard_indonesia |
-| **Compatibility** | 18.0 Community |
+| **Version** | 18.0.1.0.0 |
 | **License** | LGPL-3 |
-| **Dependencies** | base, account, sale, stock |
-
-# Layout structured for Odoo App Store submission
+| **Dependencies** | `base`, `account`, `sale`, `stock`, `hr` |
+| **Framework Compatibility**| Odoo 18.0 Community |
+| **Pricing** | $0.00 (Free) |
