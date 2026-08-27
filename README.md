@@ -24,3 +24,5 @@ Comprehensive analytics and regional operational intelligence tailored specifica
 | **Compatibility** | 18.0 Community |
 | **License** | LGPL-3 |
 | **Dependencies** | base, account, sale, stock |
+
+# Layout structured for Odoo App Store submission
