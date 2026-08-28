@@ -3,7 +3,7 @@
 ![License](https://img.shields.io/badge/License-LGPL--3-blue)
 ![Odoo](https://img.shields.io/badge/Odoo-18.0%20Community-purple)
 ![Price](https://img.shields.io/badge/Price-%240.00%20(Free)-brightgreen)
-![Bundle](https://img.shields.io/badge/Bundle-7--in--1%20Indonesian%20Suite-red)
+
 
 ## Detailed Feature Capabilities
 - **Regulatory Articles**: Statutory PPN 11% effective rate calculations and DPP Nilai Lain compliance.
