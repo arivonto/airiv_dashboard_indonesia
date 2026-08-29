@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_airiv_command_center" model="ir.actions.client">
+        <field name="name">Airiv Command Center</field>
+        <field name="tag">airiv_dashboard_indonesia.CommandCenter</field>
+    </record>
+    <menuitem id="menu_airiv_command_center_root" name="Command Center" sequence="1" web_icon="airiv_dashboard_indonesia,static/description/icon.png"/>
+    <menuitem id="menu_airiv_command_center_exec" name="Executive Dashboard" parent="menu_airiv_command_center_root" action="action_airiv_command_center" sequence="10"/>
+</odoo>
