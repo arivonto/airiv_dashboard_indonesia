@@ -19,7 +19,7 @@ airiv_dashboard_indonesia/static/description/
 
 - Odoo version: `18.0.2.1.0`
 - License: `LGPL-3`
-- Author: `Riv Cloud Management`
+- Author: `AIRIV`
 - Website: `https://airiv.id`
 
 ## Quality Gate

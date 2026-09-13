@@ -24,7 +24,7 @@ cat << 'MANIFEST' > "$MODULE_DIR/__manifest__.py"
     'version': '18.0.1.0.0',
     'category': 'Extra Tools',
     'summary': 'Executive command center built natively with Odoo 18 OWL framework for Indonesian UMKM',
-    'author': 'Riv Cloud Management',
+    'author': 'AIRIV',
     'license': 'LGPL-3',
     'depends': ['base', 'web', 'mail'],
     'data': [

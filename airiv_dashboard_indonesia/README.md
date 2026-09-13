@@ -20,7 +20,7 @@
         </ul>
 
         <div class="p-4 bg-[#f8fafc] border-l-4 border-[#0f172a]">
-            <p class="text-sm text-[#334155] font-bold">Maintained by Riv Cloud Management. Built strictly for Odoo 18 Community.</p>
+            <p class="text-sm text-[#334155] font-bold">Maintained by AIRIV. Built strictly for Odoo 18 Community.</p>
         </div>
     </div>
 </body>

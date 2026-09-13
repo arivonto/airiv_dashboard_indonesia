@@ -152,7 +152,7 @@ cat << 'HTML' > "$MODULE_DIR/static/description/index.html"
         </ul>
 
         <div class="p-4 bg-[#f8fafc] border-l-4 border-[#0f172a]">
-            <p class="text-sm text-[#334155] font-bold">Maintained by Riv Cloud Management. Built strictly for Odoo 18 Community.</p>
+            <p class="text-sm text-[#334155] font-bold">Maintained by AIRIV. Built strictly for Odoo 18 Community.</p>
         </div>
     </div>
 </body>
@@ -174,7 +174,7 @@ cat << 'MANIFEST' > "$MODULE_DIR/__manifest__.py"
     'version': '18.0.2.0.0',
     'category': 'Extra Tools',
     'summary': 'OWL-based Executive Command Center with Google Gemini AI for Indonesian UMKM',
-    'author': 'Riv Cloud Management',
+    'author': 'AIRIV',
     'license': 'LGPL-3',
     'depends': ['base', 'web', 'mail'],
     'data': [

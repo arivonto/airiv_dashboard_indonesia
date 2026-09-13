@@ -8,7 +8,7 @@ AIRIV Command Center provides an executive-grade Odoo cockpit for Indonesian bus
 It brings operational signals, portfolio readiness, business telemetry, and guided navigation into
 a focused OWL-based command surface designed for Odoo 18.
 """,
-    'author': 'Riv Cloud Management',
+    'author': 'AIRIV',
     'website': 'https://airiv.id',
     'license': 'LGPL-3',
     'price': 0.0,

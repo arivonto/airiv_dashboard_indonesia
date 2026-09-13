@@ -47,7 +47,7 @@ class AirivDemoController(http.Controller):
                         <a href="/web" class="w-full sm:w-auto text-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl shadow-sm transition-colors duration-200">
                             Access ERP Workspace
                         </a>
-                        <span class="text-xs text-slate-400">Powered by Riv Cloud Management</span>
+                        <span class="text-xs text-slate-400">Powered by AIRIV</span>
                     </div>
                 </div>
             </div>
@@ -87,7 +87,7 @@ cat << 'MANIFEST' > "$MODULE_DIR/__manifest__.py"
     'category': 'Extra Tools',
     'summary': 'Executive command center built natively with Odoo 18 OWL framework for Indonesian UMKM',
     'description': 'A high-performance executive command center built natively with Odoo 18 OWL framework, tailored specifically for Indonesian SMEs, local enterprises, and UMKM governance.',
-    'author': 'Riv Cloud Management',
+    'author': 'AIRIV',
     'license': 'LGPL-3',
     'depends': ['base', 'web', 'mail'],
     'data': [

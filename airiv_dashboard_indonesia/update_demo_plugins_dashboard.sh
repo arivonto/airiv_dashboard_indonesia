@@ -140,7 +140,7 @@ class AirivDemoController(http.Controller):
             <!-- Footer -->
             <footer class="bg-white border-t border-slate-200 mt-auto py-6">
                 <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-400">
-                    Airiv ERP Platform &mdash; Powered by Riv Cloud Management. Zero external server overhead.
+                    Airiv ERP Platform &mdash; Powered by AIRIV. Zero external server overhead.
                 </div>
             </footer>
         </body>

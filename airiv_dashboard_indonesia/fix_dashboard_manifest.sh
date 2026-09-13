@@ -10,7 +10,7 @@ cat << 'MANIFEST' > "$MANIFEST_PATH"
     'category': 'Extra Tools',
     'summary': 'Executive command center built natively with Odoo 18 OWL framework for Indonesian UMKM',
     'description': 'A high-performance executive command center built natively with Odoo 18 OWL framework, tailored specifically for Indonesian SMEs, local enterprises, and UMKM governance.',
-    'author': 'Riv Cloud Management',
+    'author': 'AIRIV',
     'license': 'LGPL-3',
     'depends': ['base', 'web', 'mail'],
     'data': [],

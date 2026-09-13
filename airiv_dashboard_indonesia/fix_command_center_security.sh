@@ -17,7 +17,7 @@ cat << 'MANIFEST' > "$MODULE_DIR/__manifest__.py"
     'version': '18.0.2.0.1',
     'category': 'Extra Tools',
     'summary': 'OWL-based Executive Command Center with Google Gemini AI for Indonesian UMKM',
-    'author': 'Riv Cloud Management',
+    'author': 'AIRIV',
     'license': 'LGPL-3',
     'depends': ['base', 'web', 'mail'],
     'data': [
