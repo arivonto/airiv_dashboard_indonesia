@@ -1,27 +1,27 @@
-<!-- Markdown generated dynamically from pure light-mode HTML specifications -->
+# Airiv Command Center
 
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8"/>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-</head>
-<body class="bg-[#f8fafc] text-[#0f172a] font-sans antialiased p-8">
-    <div class="max-w-4xl mx-auto bg-[#ffffff] border-2 border-[#cbd5e1] rounded-2xl p-10 shadow-sm">
-        <h1 class="text-4xl font-black text-[#0f172a] mb-4 border-b-2 border-[#e2e8f0] pb-4">Airiv Command Center (UMKM Edition)</h1>
-        <p class="text-lg text-[#334155] mb-8 font-medium">The ultimate Odoo 18 executive dashboard tailored for the Indonesian market, powered by native OWL and Google Gemini AI.</p>
-        
-        <h2 class="text-2xl font-bold text-[#0f172a] mb-4">Core Specifications</h2>
-        <ul class="list-disc pl-6 text-[#334155] space-y-2 mb-8 font-medium">
-            <li><strong class="text-[#0f172a]">Zero Server Maintenance:</strong> 100% native OWL components. No external proxies.</li>
-            <li><strong class="text-[#0f172a]">Pricing:</strong> Always Free ($0.00). No Enterprise License required.</li>
-            <li><strong class="text-[#0f172a]">AI Integrated:</strong> Native Google Gemini API bindings for financial insights.</li>
-            <li><strong class="text-[#0f172a]">Indonesian Standards:</strong> PPN 11% / DPP Nilai Lain, Coretax, Midtrans, Xendit, and Fonnte WhatsApp ready.</li>
-        </ul>
+OWL-based Executive Command Center for Indonesian business telemetry and portfolio operations
 
-        <div class="p-4 bg-[#f8fafc] border-l-4 border-[#0f172a]">
-            <p class="text-sm text-[#334155] font-bold">Maintained by Riv Cloud Management. Built strictly for Odoo 18 Community.</p>
-        </div>
-    </div>
-</body>
-</html>
+## Odoo Apps Store
+
+This repository contains the Odoo 18 module package for `airiv_dashboard_indonesia`.
+
+Required store assets are maintained in:
+
+```text
+airiv_dashboard_indonesia/static/description/
+  icon.png
+  banner.png
+  index.html
+```
+
+## Technical
+
+- Odoo version: `18.0.2.1.0`
+- License: `LGPL-3`
+- Author: `Riv Cloud Management`
+- Website: `https://airiv.id`
+
+## Quality Gate
+
+GitHub Actions runs the AIRIV Odoo Apps Store CI audit on branch `18.0`.
